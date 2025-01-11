@@ -8,8 +8,12 @@ app = Flask(__name__,
                   template_folder="web/templates")
 
 @app.route("/", methods=["GET"])
-def index():
-    return render_template("index.html")
+
+def getTemplate():
+    print("Rendering template with title and message")
+    return render_template('templates.html', title="Templates Page", message="Welcome to the Templates Page!")
+
+
 
 def create_app():
     return app
