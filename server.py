@@ -21,11 +21,11 @@ def process_photo():
     
 
 @app.route("/", methods=["GET"])
-def getTemplate1():
-    return render_template('template-1.html')
+def getWelcome():
+    return render_template('welcome.html')
 @app.route("/app", methods=["GET"])
-def getTemplate2():
-    return render_template('template-2.html')
+def getApp():
+    return render_template('app.html')
 
 def create_app():
     app.config['CORS_HEADERS'] = 'Content-Type'
