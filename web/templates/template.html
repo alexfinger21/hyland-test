@@ -10,6 +10,9 @@
 <body>
     <h1>{{ title }}</h1>
     <p>{{ message }}</p>
+    <label for="avatar">Choose a profile picture:</label>
+
+    <input type="file" id="avatar" name="p-photo" accept="image/png, image/jpeg" />
     <script type="module" src="{{url_for('static', filename='js/index.js')}}"></script>
 </body>
 </html>

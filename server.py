@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 from flask import render_template
+from flask_cors import CORS
 
 app = Flask(__name__,
                   static_url_path="",
@@ -16,6 +17,8 @@ def getTemplate():
 
 
 def create_app():
+    app.config['CORS_HEADERS'] = 'Content-Type'
+    CORS(app)
     return app
 
 if __name__ == "__main__":

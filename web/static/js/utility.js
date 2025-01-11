@@ -1,3 +1,3 @@
 export function main(fn) {
-  window.addEventListener("load", fn)
+  document.addEventListener("DOMContentLoaded", fn)
 }
