@@ -11,7 +11,7 @@ app = Flask(__name__,
 
 def getTemplate():
     print("Rendering template with title and message")
-    return render_template('templates.html', title="Templates Page", message="Welcome to the Templates Page!")
+    return render_template('template.html', title="Templates Page", message="Welcome to the Templates Page!")
 
 
 
