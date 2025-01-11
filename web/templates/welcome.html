@@ -6,12 +6,36 @@
     <link rel="preload" href="{{url_for('static', filename='js/index.js')}}" as="script" />
     <link rel="preload" href="{{url_for('static', filename='js/utility.js')}}" as="script" />
     <link rel="stylesheet" href="{{url_for('static', filename='styles/welcome.css')}}" as="script" />
+    <link rel="stylesheet" href="{{url_for('static', filename='styles/universal.css')}}" as="script" />
     <title>Home Page</title>
 </head>
 <body>
-    <label for="avatar">Choose a profile picture:</label>
-
-    <input type="file" id="avatar" name="p-photo" accept="image/png, image/jpeg" />
+    <div class="page-holder">
+        <div id="div-1">
+            <img id="pills" src="{{url_for('static', filename='media/prescription.png')}}">
+            <div id="top-holder">
+                <div id="app-title">
+                  Our App
+                </div>
+                <div class="spacer"></div>
+                <div>
+                    Hyland Hackathon
+                </div>
+                <div class="spacer"></div>
+                <div>
+                    2025
+                </div>
+                <div class="spacer"></div>
+                <div class="spacer"></div>
+                <div id="get-started">
+                    Get started
+                </div>
+            </div>
+        </div>
+        <div id="div-2">
+            <div class="bottom-text">
+        </div>
+    </div>
     <script type="module" src="{{url_for('static', filename='js/index.js')}}"></script>
 </body>
 </html>
