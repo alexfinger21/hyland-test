@@ -6,6 +6,8 @@ from openai import OpenAI
 from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
+import json
+import datetime
 import base64
 
 
@@ -24,7 +26,7 @@ class PrescriptionInfo(BaseModel):
     Strength: int
     StartDate: str
     Directions: str
-    Time: int
+    Hour: str
     Interval: int
     Quantity: int
     Refills: int
@@ -65,11 +67,11 @@ def process_photo():
                         "Strength": 0,  # mg/pill
                         "StartDate": "", # start date (in format YYYYMMDD)
                         "Directions": "",  # just a string of directions
-                        "Time": 0, # time of day (in hours 0-24) that is best to take this
+                        "Hour": 01, # time of day (in hours 00-24) that is best to take this
                         "Interval": 1,  # how often it should be taken (in days) (minimum 1)
                         "Quantity": 0,  # pills in bottle
                         "Refills": 0,  # number of refills
-                        "EndDate": "",  # refill date if there are refills, end date if refills = 0 (in format YYYYMMDD)
+                        "EndDate": "",  # refill date if there are refills, if there are no refills then  (in format YYYYMMDD)
                         "Warnings": ""  # any warnings or side effects
                         }
                         """,
@@ -83,7 +85,17 @@ def process_photo():
         ],
     )
     perscription_info = response.choices[0].message.content
-    return perscription_info
+    dict_data = json.loads(perscription_info[7:-3])
+
+    for i in range(0, len(dict_data)):
+        if dict_data[i]['StartDate'] == dict_data[i]['EndDate']:
+            startdate = datetime.date(int(dict_data[i]['StartDate'][:4]), int(dict_data[i]['StartDate'][4:6]), int(dict_data[i]['StartDate'][6:8]))
+            delta = datetime.timedelta(days=dict_data[i]['Quantity'] * dict_data[i]['Interval'])
+            endDate = (startdate + delta).isoformat()
+            endDate = endDate.replace("-", "")
+            dict_data[i]['EndDate'] = endDate
+
+    return json.dumps(dict_data)
     
 
 @app.route("/", methods=["GET"])
