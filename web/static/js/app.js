@@ -21,6 +21,10 @@ main(() => {
         req = await req.json()
         console.log("REQ:")
         console.log(req)
+        
+        if (!req?.length) {
+            req = [req]
+        }
 
         const prescriptionBg = document.getElementById("new-prescriptions-bg")
         prescriptionBg.classList.remove("hidden")
