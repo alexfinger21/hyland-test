@@ -26,6 +26,10 @@ main(() => {
             req = [req]
         }
 
+        if (req.error) {
+            console.log("err")
+        }
+
         const prescriptionBg = document.getElementById("new-prescriptions-bg")
         prescriptionBg.classList.remove("hidden")
         const header = prescriptionBg.getElementsByClassName("prescriptions-head-container")[0]
