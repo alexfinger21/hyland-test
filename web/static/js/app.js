@@ -100,6 +100,18 @@ const createPrescription = (med, link) => {
 main(() => {
     const uploadBtn = document.getElementById("files")
     const addButton = document.getElementById("add-button")
+    const scroller = document.getElementById("scroller")
+
+    const localS = JSON.parse(localStorage.getItem("previousPrescriptions"))
+
+    if (localS) { 
+        for (let i = 0; i<localS.length; ++i) {
+            console.log(localS[i])
+            const btn = createPrescription(localS[i])
+            btn.style.zIndex = i
+            scroller.appendChild(btn)
+        }
+    }
 
     addButton.addEventListener("touchstart", ()=> {
         console.log('touch start')
