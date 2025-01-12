@@ -1,7 +1,6 @@
 import { main } from "./utility.js"
 
 main(() => {
-    console.log("hello world")
     /*
     const uploadBtn = document.getElementById("avatar")
     uploadBtn.addEventListener("click", async (e) => {
