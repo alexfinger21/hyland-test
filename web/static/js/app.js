@@ -1,8 +1,7 @@
 import { main } from "./utility.js"
 
 main(() => {
-    /*
-    const uploadBtn = document.getElementById("avatar")
+    const uploadBtn = document.getElementById("files")
     uploadBtn.addEventListener("click", async (e) => {
         const url = "http://localhost:8080/upload-photo"
         const formData = new FormData()
@@ -15,10 +14,5 @@ main(() => {
         })
 
         console.log(req)
-    })
-    */
-    const appBtn = document.getElementById("app-btn")
-    appBtn.addEventListener("click", async (e) => {
-        window.location.replace("/app")
     })
 })
