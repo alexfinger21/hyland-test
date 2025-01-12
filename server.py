@@ -114,7 +114,6 @@ def process_photo():
         except:
             data = dict_data
             to_break = True
-        print(data)
 
         # logic to figure out what the end date is
         if data['StartDate'] == data['EndDate']:
