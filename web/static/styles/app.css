@@ -60,7 +60,7 @@
 }
 
 .prescriptions-header {
-    font-size: 1.7em !important;
+    font-size: 1.7em;
     text-align: center;
     color: #1D3354;
 }
@@ -172,4 +172,41 @@
     width: 7vh;
     border-radius: 1000px;
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 4px 10px 0 rgba(0, 0, 0, 0.19);
+}
+
+#new-prescription-bg {
+    display: block;
+    position: absolute;
+    top:5vh;
+    left:0;
+    background-color: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: 100%;
+}
+
+#new-prescriptions-container {
+    display: flex;
+    flex-direction: column;
+    width: 88%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10vh;
+    height: 60%;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 4px 10px 0 rgba(0, 0, 0, 0.19);
+    border: none;
+    border-radius: 50px;
+    background-color: #F6F4F3;
+    padding: 2%;
+}
+
+#new-prescriptions-container .prescriptions-row > div > label {
+    font-size: 0.8em;
+}
+
+#new-prescriptions-container .prescriptions-row > div > input {
+    font-size: 0.8em;
+}
+
+#new-prescriptions-container .prescriptions-header {
+    font-size: 1em;
 }
