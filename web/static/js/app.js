@@ -41,42 +41,41 @@ const createPrescription = (med) => {
                             <input type="date" id="fquantity" name="fquantity"><br>
                         </div>
                         <div>
-                            <label for="strength">Strength:</label><br>
-                            <input type="text" id="fstrength" name="strength"><br>
+                            <label for="startDate">Start Date:</label><br>
+                            <input type="date" id="fstartName" name="fstartName"><br>
                         </div>
                     </div>
                     <div class="prescriptions-row">
                         <div>
-                            <label for="startDate">Start Date:</label><br>
-                            <input type="date" id="fstartName" name="fstartName"><br>
+                            <label for="strength">Strength:</label><br>
+                            <input type="text" id="fstrength" name="strength"><br>
                         </div>
                         <div>
                             <label for="directions">Directions:</label><br>
-                            <input type="text" id="fdirections" name="directions"><br>
+                            <input type="text" id="fdirections" name="directions" ><br>
                         </div>
                     </div>
                     <div class="prescriptions-row">
                         <div>
                             <label for="hour">Hour:</label><br>
-                            <input type="text" id="fHour" name="fHour"><br>
+                            <input type="text" id="fHour" name="fHour" value=${med.Hour}><br>
                         </div>
                         <div>
                             <label for="interval">Interval:</label><br>
-                            <input type="text" id="finterval" name="interval"><br>
+                            <input type="text" id="finterval" name="interval" value=${med.Interval}><br>
                         </div>
                     </div>
                     <div class="prescriptions-row">
                         <div>
                             <label for="quantity">Quantity:</label><br>
-                            <input type="text" id="fquantity" name="fquantity"><br>
+                            <input type="text" id="fquantity" name="fquantity" value=${med.Quantity}><br>
                         </div>
                         <div>
                             <label for="refills">Refills:</label><br>
-                            <input type="text" id="frefills" name="refills"><br>
+                            <input type="text" id="frefills" name="refills" value=${med.Refills}><br>
                         </div>
                     </div>
-                    <div class="prescriptions-row">
-
+                    <p>${med.Warnings}</p>
                 </form>
                 <a class="prescriptions-action">Add to Google Calendar</a>
             </button>`
