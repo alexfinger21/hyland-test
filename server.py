@@ -92,10 +92,13 @@ def process_photo():
     print("just finished querying gpt")
     prescription_info = response.choices[0].message.content
     print(prescription_info)
-    dict_data = json.loads(prescription_info[7:-3])
+    try:
+        dict_data = json.loads(prescription_info[7:-3])
+    except:
+        return json.dumps({"error": "incorrect image"})
 
     # for each prescription in the image
-    for i in range(0, len(dict_data)):
+    for i in range(len(dict_data)):
 
         # logic to figure out what the end date is
         if dict_data[i]['StartDate'] == dict_data[i]['EndDate']:

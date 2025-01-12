@@ -14,5 +14,8 @@ main(() => {
         })
 
         console.log(req)
+        for (const x of req) {
+            console.log(req)
+        }
     })
 })
