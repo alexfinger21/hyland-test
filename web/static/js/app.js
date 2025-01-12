@@ -167,6 +167,7 @@ main(() => {
         const scroller = document.getElementById("scroller")
         const header = prescriptionBg.getElementsByClassName("prescriptions-head-container")[0]
         const formElements = Array.from(prescriptionBg.getElementsByClassName("prescriptions-form"))[0]
+        const warningText = prescriptionBg.getElementsByClassName("prescriptions-warnings")[0]
         let counter = 0 
 
         
@@ -175,19 +176,18 @@ main(() => {
             update()
         }
 
-        const saveLocalStorage = async (elemVals, counter) => {
+        const saveLocalStorage = async (elemVals, warningText, counter) => {
             let request;
             const rqBody = {
-                "Name": elemVals[0],
-                "Strength": elemVals[1],
-                "StartDate": elemVals[2].replace(/-/g, ''),
+                "EndDate": elemVals[0].replace(/-/g, ''),
+                "StartDate": elemVals[1].replace(/-/g, ''),
+                "Strength": elemVals[2],
                 "Directions": elemVals[3],
                 "Hour": elemVals[4],
                 "Interval": elemVals[5],
                 "Quantity": elemVals[6],
                 "Refills": elemVals[7],
-                "EndDate": elemVals[8].replace(/-/g, ''),
-                "Warnings": elemVals[9],
+                "Warnings": warningText,
             }
 
             if (elemVals[0] && elemVals[0].length != 0) {
@@ -202,24 +202,22 @@ main(() => {
             const med = req[counter]
             console.log(med)
             const btn = createPrescription(med)
-            btn.style.zIndex = counter
+            btn.style.zIndex = scroller.children.length+1
             scroller.appendChild(btn)
             const headContainer = btn.getElementsByClassName("prescriptions-head-container")[0]
             btn.style.maxHeight = headContainer.clientHeight + 10 + "px"
-            const warningText = btn.getElementsByClassName("prescription-warning")[0]
 
 
             const saveBody = {
-                "Name": elemVals[0],
-                "Strength": elemVals[1],
-                "StartDate": elemVals[2],
+                "EndDate": elemVals[0].replace(/-/g, ''),
+                "StartDate": elemVals[1].replace(/-/g, ''),
+                "Strength": elemVals[2],
                 "Directions": elemVals[3],
                 "Hour": elemVals[4],
                 "Interval": elemVals[5],
                 "Quantity": elemVals[6],
                 "Refills": elemVals[7],
-                "EndDate": elemVals[8],
-                "Warnings": elemVals[9],
+                "Warnings": warningText,
                 "Link": calUrl
             }
 
@@ -234,22 +232,21 @@ main(() => {
         const update = async () => {
             if (counter != 0) {
                 const elemVals = Object.values(formElements).slice(0, 10).map(m => m.value)
-                saveLocalStorage(elemVals, counter-1)
+                saveLocalStorage(elemVals, warningText.innerText, counter-1)
             }
 
             const med = req[counter]
             header.innerHTML = "Add " + med.Name
-            formElements[0].value = med.Name
-            formElements[1].value = med.Strength
-            formElements[2].value = med.StartDate.substr(0, 4) + '-' + med.StartDate.substr(4, 2) + '-' + med.StartDate.substr(6, 2)
-            console.log(med.StartDate.substr(0, 4) + '-' + med.StartDate.substr(4, 2) + '-' + med.StartDate.substr(6, 2))
+            formElements[0].value = med.EndDate.substr(0, 4) + '-' + med.EndDate.substr(4, 2) + '-' + med.EndDate.substr(6, 2)
+            console.log(med.EndDate.substr(0, 4) + '-' + med.EndDate.substr(4, 2) + '-' + med.EndDate.substr(6, 2))
+            formElements[1].value = med.StartDate.substr(0, 4) + '-' + med.StartDate.substr(4, 2) + '-' + med.StartDate.substr(6, 2)
+            formElements[2].value = med.Strength
             formElements[3].value = med.Directions
             formElements[4].value = med.Hour
             formElements[5].value = med.Interval
             formElements[6].value = med.Quantity
             formElements[7].value = med.Refills
-            formElements[8].value = med.EndDate.substr(0, 4) + '-' + med.EndDate.substr(4, 2) + '-' + med.EndDate.substr(6, 2)
-            formElements[9].value = med.Warnings
+            warningText.innerText = med.Warnings
 
 
             if (counter >= req.length - 1) {

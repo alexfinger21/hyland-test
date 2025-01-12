@@ -17,11 +17,11 @@
 #scroller {
     display: flex;
     flex-direction: column;
-    flex: 8;
     padding-top: 5%;
     overflow-y: auto;
     overflow-x: none;
     max-height: 80vh;
+    height: 80vh;
 }
 
 .prescriptions-container {
@@ -72,6 +72,7 @@
 .prescriptions-head-container {
     display: flex;
     flex-direction: column;
+    flex: 10;
     text-align: left;
     margin-left: 5%;
 }   
@@ -79,8 +80,7 @@
 .prescriptions-head-container p {
     font-size: 1.5em;
     margin: 0px;
-    margin-top: 2%;
-    margin-bottom: 2%;
+    margin-top: 1%;
 }
 
 .prescriptions-header {
