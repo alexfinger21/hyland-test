@@ -128,7 +128,7 @@ prescription = {
 def create_event():
     prescription = request.get("prescription")
     if len(prescription["Hour"]) == 1:
-        prescription["Hour"] = f"0{prescription["Hour"]}"
+        prescription["Hour"] = f"0{prescription['Hour']}"
     
     m_event_name = f"{prescription['Name']} {prescription['Strength']}mg" #replace with drug name
     m_start_date_starttime = f"{prescription['StartDate']}T{prescription['Hour']}0000-0500"
