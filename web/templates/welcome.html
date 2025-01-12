@@ -10,6 +10,14 @@
     <title>Home Page</title>
 </head>
 <body>
+    <div class="topbar">
+        <p>
+        DALTS
+        </p>
+        <a href="https://www.hyland.com/en/resources/events/hy-tech/hackathon" target="_blank">
+            Hyland 2025 🏠
+        </a>
+    </div>
     <div class="page-holder">
         <div id="div-1">
             <img id="pills" src="{{url_for('static', filename='media/prescription.png')}}">
@@ -27,9 +35,9 @@
                 </div>
                 <div class="spacer"></div>
                 <div class="spacer"></div>
-                <div id="get-started">
+                <a href="app" id="get-started">
                     Get started
-                </div>
+                </a>
             </div>
         </div>
         <div id="div-2">
@@ -49,6 +57,10 @@
             <div class="spacer"></div>
             <div class="bottom-text">
                 Make a schedule      
+            </div>
+
+            <div style="background-image: url('/media/pill-fade.png')" id="pill-fade">
+                <button id="app-btn" type="button">Go to the app</button> 
             </div>
         </div>
     </div>
