@@ -20,6 +20,24 @@ body {
     background-color: #F6F4F3;
 }
 
+.image-container {
+    display: flex;
+    align-items: center; /* Ensures vertical alignment */
+    justify-content: start;
+    gap: 10px; /* Adds spacing between images */
+    margin-left: -20px;
+}
+
+.logo-image, .medley-image {
+    height: 40px; /* Set desired height */
+    width: auto; /* Automatically adjust the width to maintain aspect ratio */
+}
+
+.hyland_text {
+    position: relative;
+    margin-right: 3% !important;
+}
+
 .topbar p {
     display: inline-block;
     margin-top: auto;

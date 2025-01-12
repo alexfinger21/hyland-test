@@ -15,10 +15,13 @@
 <body>
     <div class="topbar">
         <p>
-            <img src="medley_words.png" alt="Logo">
+            <div class="image-container">
+                <img class="logo-image" src="{{url_for('static', filename='media/medley_logo.png')}}" alt="Logo" style=>
+                <img class="medley-image" src="{{url_for('static', filename='media/medley_words.png')}}" alt="Medley Words">
+            </div>
         </p>
-        <a href="https://www.hyland.com/en/resources/events/hy-tech/hackathon" target="_blank">
-            Hyland 2025 🏠
+        <a class="hyland_text" href="https://www.hyland.com/en/resources/events/hy-tech/hackathon" target="_blank">
+            Hyland🏠
         </a>
     </div>
     <div class="page-holder">
