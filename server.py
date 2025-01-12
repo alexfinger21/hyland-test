@@ -12,14 +12,14 @@ import datetime
 import base64
 
 
-# load_dotenv()
-# client = OpenAI(
-#     api_key = os.getenv("HACKATHON_KEY")
-# )
+load_dotenv()
+client = OpenAI(
+    api_key = os.getenv("HACKATHON_KEY")
+)
 
-# def encode_image(image_path):
-#     with open(image_path, "rb") as image_file:
-#         return base64.b64encode(image_file.read()).decode("utf-8")
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode("utf-8")
 
 class PrescriptionInfo(BaseModel):
     id: int
@@ -44,58 +44,63 @@ app = Flask(
 
 @app.route("/upload-photo", methods=["POST"])
 def process_photo():
+    print("about to query gpt")
     image = request.files.get("image", "")
     image.save("./test.jpg")
 
-    # file_content = image.read()
-    # base64_image = base64.b64encode(file_content).decode('utf-8')
+    with open("test.jpg", "rb") as f:
+        image_bytes = f.read()
 
-    # response = client.chat.completions.create(
-    #     model="gpt-4o-mini",
-    #     messages=[
-    #         {
-    #             "role": "user",
-    #             "content": [
-    #                 {
-    #                     "type": "text",
-    #                     "text": 
-    #                     """
-    #                     extract the prescription  and respond with json in the following format
-    #                     {
-    #                     "id": 0, # number ID
-    #                     "Name": "",  # name of drug
-    #                     "Strength": 0,  # mg/pill
-    #                     "StartDate": "", # start date (in format YYYYMMDD)
-    #                     "Directions": "",  # just a string of directions
-    #                     "Hour": 01, # time of day (in hours 00-24) that is best to take this
-    #                     "Interval": 1,  # how often it should be taken (in days) (minimum 1)
-    #                     "Quantity": 0,  # pills in bottle
-    #                     "Refills": 0,  # number of refills
-    #                     "EndDate": "",  # refill date if there are refills, if there are no refills then  (in format YYYYMMDD)
-    #                     "Warnings": ""  # any warnings or side effects
-    #                     }
-    #                     """,
-    #                 },
-    #                 {
-    #                     "type": "image_url",
-    #                     "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
-    #                 },
-    #             ],
-    #         }
-    #     ],
-    # )
-    # prescription_info = response.choices[0].message.content
-    # dict_data = json.loads(prescription_info[7:-3])
+    base64_image = base64.b64encode(image_bytes).decode('utf-8')
 
-    # for i in range(0, len(dict_data)):
-    #     if dict_data[i]['StartDate'] == dict_data[i]['EndDate']:
-    #         startdate = datetime.date(int(dict_data[i]['StartDate'][:4]), int(dict_data[i]['StartDate'][4:6]), int(dict_data[i]['StartDate'][6:8]))
-    #         delta = datetime.timedelta(days=dict_data[i]['Quantity'] * dict_data[i]['Interval'])
-    #         endDate = (startdate + delta).isoformat()
-    #         endDate = endDate.replace("-", "")
-    #         dict_data[i]['EndDate'] = endDate
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": 
+                        """
+                        extract the prescription  and respond with json in the following format
+                        {
+                        "id": 0, # number ID
+                        "Name": "",  # name of drug
+                        "Strength": 0,  # mg/pill
+                        "StartDate": "", # start date (in format YYYYMMDD)
+                        "Directions": "",  # just a string of directions
+                        "Hour": 01, # time of day (in hours 00-24) that is best to take this
+                        "Interval": 1,  # how often it should be taken (in days) (minimum 1)
+                        "Quantity": 0,  # pills in bottle
+                        "Refills": 0,  # number of refills
+                        "EndDate": "",  # refill date if there are refills, if there are no refills then  (in format YYYYMMDD)
+                        "Warnings": ""  # any warnings or side effects
+                        }
+                        """,
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
+                    },
+                ],
+            }
+        ],
+    )
+    print("just finished querying gpt")
+    prescription_info = response.choices[0].message.content
+    dict_data = json.loads(prescription_info[7:-3])
 
-    # return json.dumps(dict_data)
+    for i in range(0, len(dict_data)):
+        if dict_data[i]['StartDate'] == dict_data[i]['EndDate']:
+            startdate = datetime.date(int(dict_data[i]['StartDate'][:4]), int(dict_data[i]['StartDate'][4:6]), int(dict_data[i]['StartDate'][6:8]))
+            delta = datetime.timedelta(days=dict_data[i]['Quantity'] * dict_data[i]['Interval'])
+            endDate = (startdate + delta).isoformat()
+            endDate = endDate.replace("-", "")
+            dict_data[i]['EndDate'] = endDate
+
+    print(json.dumps(dict_data))
+    return json.dumps(dict_data)
     
 
 @app.route("/", methods=["GET"])
