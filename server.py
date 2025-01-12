@@ -148,9 +148,9 @@ def process_photo():
         print("not sigma at ALL")
         print("***************** IMAGE NOT UPLOADED *****************")
 
-    process_image("raw.jpg", "scanned.jpg")
+    #process_image("raw.jpg", "scanned.jpg")
 
-    with open("scanned.jpg", "rb") as f:
+    with open("raw.jpg", "rb") as f:
         image_bytes = f.read()
 
     base64_image = base64.b64encode(image_bytes).decode('utf-8')
@@ -190,10 +190,11 @@ def process_photo():
     )
 
     prescription_info = response.choices[0].message.content
-    match = re.search(r'```json (.*?)```', prescription_info, re.DOTALL)
+    match = re.search(r'```json(.*)```', prescription_info, re.DOTALL)
     print(prescription_info)
     if match:
-        prescription_info = match.group(1)
+        print("Found Chat GPT Yap")
+        prescription_info = "```json" + match.group(1) + "```"
 
     print(prescription_info)
     if prescription_info[8] == '{':
