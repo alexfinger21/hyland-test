@@ -9,6 +9,7 @@
 #pills {
     margin: 11% -6% -1% 6%;
     object-fit: contain;
+    width: 35%;
     flex: 3;
     transform: translate(-8%, 7vh);
 }
