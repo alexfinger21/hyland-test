@@ -22,12 +22,15 @@ main(() => {
         console.log("REQ:")
         console.log(req)
         
-        if (!req?.length) {
-            req = [req]
-        }
-
         if (req.error) {
             console.log("err")
+            addButton.classList.remove("expanded")
+            addButton.innerText = "+"
+            return
+        }
+
+        if (!req?.length) {
+            req = [req]
         }
 
         const prescriptionBg = document.getElementById("new-prescriptions-bg")
