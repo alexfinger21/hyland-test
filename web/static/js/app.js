@@ -111,7 +111,7 @@ main(() => {
     })
 
     uploadBtn.addEventListener("change", async (e) => {
-        const url = "http://localhost:8080/upload-photo"
+        const url = "/upload-photo"
         const formData = new FormData()
         formData.append("image", document.getElementById("files").files[0])
         console.log(document.getElementById("files").files[0])
@@ -128,19 +128,22 @@ main(() => {
         req = await req.json()
         console.log("REQ:")
         console.log(req)
-        
+
         if (req.error) {
-            console.log("err")
             addButton.classList.remove("expanded")
             addButton.innerText = "+"
+
+            console.log("err")
             return
         }
-
+        
         if (!req?.length) {
             req = [req]
         }
 
+
         const prescriptionBg = document.getElementById("new-prescriptions-bg")
+        const calendarLink = Array.from(prescriptionBg.getElementsByClassName("prescriptions-action"))[0]
         prescriptionBg.classList.remove("hidden")
         const scroller = document.getElementById("scroller")
         const header = prescriptionBg.getElementsByClassName("prescriptions-head-container")[0]
@@ -158,7 +161,59 @@ main(() => {
             update()
         }
 
-        const update = () => {
+        const saveLocalStorage = async (elemVals) => {
+            let request;
+            const rqBody = {
+                "Name": elemVals[0],
+                "Strength": elemVals[1],
+                "StartDate": elemVals[2].replace(/-/g, ''),
+                "Directions": elemVals[3],
+                "Hour": elemVals[4],
+                "Interval": elemVals[5],
+                "Quantity": elemVals[6],
+                "Refills": elemVals[7],
+                "EndDate": elemVals[8].replace(/-/g, ''),
+                "Warnings": elemVals[9],
+            }
+            console.log(rqBody)
+
+            if (elemVals[0] && elemVals[0].length != 0) {
+                request = await fetch("/create-event", {
+                    method: "POST",
+                    body: JSON.stringify(rqBody)
+                })
+            }
+
+            const calUrl =  await request.text()
+
+            const saveBody = {
+                "Name": elemVals[0],
+                "Strength": elemVals[1],
+                "StartDate": elemVals[2],
+                "Directions": elemVals[3],
+                "Hour": elemVals[4],
+                "Interval": elemVals[5],
+                "Quantity": elemVals[6],
+                "Refills": elemVals[7],
+                "EndDate": elemVals[8],
+                "Warnings": elemVals[9],
+                "Link": calUrl
+            }
+
+            const prevStorage = JSON.parse(localStorage.getItem("previousPrescriptions")) ? JSON.parse(localStorage.getItem("previousPrescriptions")) : []
+            prevStorage.push(saveBody)
+            console.log(prevStorage)
+            console.log(JSON.parse(JSON.stringify(prevStorage)))
+
+            localStorage.setItem("previousPrescriptions", JSON.stringify(prevStorage))
+        }
+
+        const update = async () => {
+            if (counter != 0) {
+                const elemVals = Object.values(formElements).slice(0, 10).map(m => m.value)
+                saveLocalStorage(elemVals)
+            }
+
             const med = req[counter]
             header.innerHTML = "Add " + med.Name
             formElements[0].value = med.Name
@@ -174,11 +229,12 @@ main(() => {
             formElements[9].value = med.Warnings
 
             if (counter >= req.length - 1) {
+                const elemVals = Object.values(formElements).slice(0, 10).map(m => m.value)
+                saveLocalStorage(elemVals)
                 addButton.removeEventListener("click", onButtonPress)
                 prescriptionBg.classList.add("hidden")
                 addButton.classList.remove("expanded")
                 addButton.innerText = "+"
-                return
             }
             counter += 1
         }
@@ -188,9 +244,5 @@ main(() => {
         if(counter < req.length) {
             addButton.addEventListener("click", onButtonPress)
         }
-
-
-
-        
     })
 })
