@@ -201,6 +201,8 @@ main(() => {
             scroller.appendChild(btn)
             const headContainer = btn.getElementsByClassName("prescriptions-head-container")[0]
             btn.style.maxHeight = headContainer.clientHeight + 10 + "px"
+            const warningText = btn.getElementsByClassName("prescription-warning")[0]
+
 
             const saveBody = {
                 "Name": elemVals[0],
@@ -243,6 +245,7 @@ main(() => {
             formElements[7].value = med.Refills
             formElements[8].value = med.EndDate.substr(0, 4) + '-' + med.EndDate.substr(4, 2) + '-' + med.EndDate.substr(6, 2)
             formElements[9].value = med.Warnings
+
 
             if (counter >= req.length - 1) {
                 addButton.removeEventListener("click", onButtonPress)

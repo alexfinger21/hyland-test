@@ -74,7 +74,6 @@
     flex-direction: column;
     text-align: left;
     margin-left: 5%;
-    flex: 10;
 }   
 
 .prescriptions-head-container p {
@@ -221,6 +220,7 @@
 #new-prescriptions-bg {
     display: block;
     position: absolute;
+    z-index: 100;
     top:5vh;
     left:0;
     background-color: rgba(0, 0, 0, 0.5);
@@ -241,7 +241,7 @@
     border: none;
     border-radius: 50px;
     background-color: #F6F4F3;
-    padding: 2%;
+    padding: 6% 0% 8% 4%;
 }
 
 #new-prescriptions-container .prescriptions-row > div > label {
