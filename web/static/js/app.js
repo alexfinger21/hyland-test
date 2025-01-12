@@ -168,6 +168,7 @@ main(() => {
         const header = prescriptionBg.getElementsByClassName("prescriptions-head-container")[0]
         const formElements = Array.from(prescriptionBg.getElementsByClassName("prescriptions-form"))[0]
         const warningText = prescriptionBg.getElementsByClassName("prescriptions-warnings")[0]
+        const title = prescriptionBg.getElementsByClassName("prescriptions-head-container")[0].innerHTML.substring(4)
         let counter = 0 
 
         
@@ -176,7 +177,7 @@ main(() => {
             update()
         }
 
-        const saveLocalStorage = async (elemVals, warningText, counter) => {
+        const  saveLocalStorage = async (elemVals, warningText, title, counter) => {
             let request;
             const rqBody = {
                 "EndDate": elemVals[0].replace(/-/g, ''),
@@ -188,6 +189,7 @@ main(() => {
                 "Quantity": elemVals[6],
                 "Refills": elemVals[7],
                 "Warnings": warningText,
+                "Name": title,
             }
 
             if (elemVals[0] && elemVals[0].length != 0) {
@@ -198,9 +200,11 @@ main(() => {
             }
 
             const calUrl =  await request.text()
-            console.log("COUNTER", counter)
-            const med = req[counter]
+            console.log("COUNTER", req, counter)
+            const med = req[counter]  
             console.log(med)
+            med.EndDate = med.EndDate.substr(0, 4) + '-' + med.EndDate.substr(4, 2) + '-' + med.EndDate.substr(6, 2)
+            med.StartDate = med.StartDate.substr(0, 4) + '-' + med.StartDate.substr(4, 2) + '-' + med.StartDate.substr(6, 2)
             const btn = createPrescription(med)
             btn.style.zIndex = scroller.children.length+1
             scroller.appendChild(btn)
@@ -218,6 +222,7 @@ main(() => {
                 "Quantity": elemVals[6],
                 "Refills": elemVals[7],
                 "Warnings": warningText,
+                "Name": title,
                 "Link": calUrl
             }
 
@@ -232,13 +237,13 @@ main(() => {
         const update = async () => {
             if (counter != 0) {
                 const elemVals = Object.values(formElements).slice(0, 10).map(m => m.value)
-                saveLocalStorage(elemVals, warningText.innerText, counter-1)
+                saveLocalStorage(elemVals, warningText.innerText, title, counter-1)
             }
 
             const med = req[counter]
             header.innerHTML = "Add " + med.Name
             formElements[0].value = med.EndDate.substr(0, 4) + '-' + med.EndDate.substr(4, 2) + '-' + med.EndDate.substr(6, 2)
-            console.log(med.EndDate.substr(0, 4) + '-' + med.EndDate.substr(4, 2) + '-' + med.EndDate.substr(6, 2))
+            console.log("DATAE", med.EndDate.substr(0, 4) + '-' + med.EndDate.substr(4, 2) + '-' + med.EndDate.substr(6, 2))
             formElements[1].value = med.StartDate.substr(0, 4) + '-' + med.StartDate.substr(4, 2) + '-' + med.StartDate.substr(6, 2)
             formElements[2].value = med.Strength
             formElements[3].value = med.Directions
@@ -255,7 +260,7 @@ main(() => {
                     e.preventDefault()
                     console.log("ASDJKHASKDJASHKJDS")
                     const elemVals = Object.values(formElements).slice(0, 10).map(m => m.value)
-                    saveLocalStorage(elemVals, counter-1)
+                    saveLocalStorage(elemVals, warningText.innerText, title, counter-1)
                     prescriptionBg.classList.add("hidden")
                     addButton.classList.remove("expanded")
                     addButton.innerText = "+"
