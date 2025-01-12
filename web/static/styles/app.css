@@ -27,7 +27,6 @@
 .prescriptions-container {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 4px 10px 0 rgba(0, 0, 0, 0.19);
     border: none;
     height: fit-content;
@@ -44,7 +43,6 @@
 
 .prescriptions-container.expanded {
     max-height: 80vh;
-    display: inline-block;
 }
 
 

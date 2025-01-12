@@ -22,12 +22,12 @@ function getNextMedicationDay(startDate, interval) {
 }
 
 
-const createPrescription = (name, startDate, interval) => {
+const createPrescription = (med) => {
     const element = document.createElement("template")
     element.innerHTML = `<button class="prescriptions-container">
                 <div class="prescriptions-horizontal-container">
                     <div class="prescriptions-head-container">
-                        <p class="prescriptions-header">${name}: Next ${getNextMedicationDay(startDate, interval)}</p>
+                        <p class="prescriptions-header">${name}: ${getNextMedicationDay(startDate, interval)}</p>
                         <p class="prescriptions-description">Click To Expand</p>
                     </div>
                     <div class="remove-button">
@@ -37,8 +37,8 @@ const createPrescription = (name, startDate, interval) => {
                 <form class="prescriptions-form">
                     <div class="prescriptions-row">
                         <div>
-                            <label for="name">Name:</label><br>
-                            <input type="text" id="fname" name="fname"><br>
+                            <label for="endDate">End Date:</label><br>
+                            <input type="date" id="fquantity" name="fquantity"><br>
                         </div>
                         <div>
                             <label for="strength">Strength:</label><br>
@@ -82,6 +82,7 @@ const createPrescription = (name, startDate, interval) => {
             </button>`
 
     const btn = element.content.firstChild
+    const headContainer = btn.getElementsByClassName("prescriptions-head-container")[0]
     btn.addEventListener("click", () => {
         if(btn.classList.contains("expanded")) {
             btn.classList.remove("expanded")
