@@ -7,6 +7,9 @@
     <link rel="preload" href="{{url_for('static', filename='js/utility.js')}}" as="script" />
     <link rel="stylesheet" href="{{url_for('static', filename='styles/welcome.css')}}" as="script" />
     <link rel="stylesheet" href="{{url_for('static', filename='styles/universal.css')}}" as="script" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Yantramanav:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
     <title>Home Page</title>
 </head>
 <body>
@@ -33,10 +36,8 @@
                 <div>
                     2025
                 </div>
-                <div class="spacer"></div>
-                <div class="spacer"></div>
                 <a href="app" id="get-started">
-                    Get started
+                    Get started >
                 </a>
             </div>
         </div>
@@ -45,7 +46,7 @@
             <div class="spacer"></div>
             <div class="spacer"></div>
             <div class="spacer"></div>
-            <div style="padding-left: 14%; "class="bottom-text">
+            <div style="padding-left: 30%; "class="bottom-text">
                 Analyze prescriptions
             </div>
             <div class="spacer"></div>
@@ -59,9 +60,9 @@
                 Make a schedule      
             </div>
 
-            <div style="background-image: url('/media/pill-fade.png')" id="pill-fade">
-                <button id="app-btn" type="button">Go to the app</button> 
-            </div>
+        </div>
+        <div style="background-image: url('/media/pill-fade.png')" id="pill-fade">
+            <button id="app-btn" type="button">Go to the app</button> 
         </div>
     </div>
     <script type="module" src="{{url_for('static', filename='js/index.js')}}"></script>

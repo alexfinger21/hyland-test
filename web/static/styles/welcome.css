@@ -1,22 +1,16 @@
-body {
-    margin: 0;
-}
-
 #div-1 {
     background-color: rgba(235, 161, 161, 0.35);
     width: 100%;
     height: 35vh;
     display: flex;
     flex-direction: row;
-    position: absolute;
 }
 
 #pills {
-    width: 80%;
-    margin: 10% 5% 10% 10%;
-    height: fit-content;
-    flex: 2.5;
-    transform: translate(-8%, 5vh);
+    margin: 11% -6% -1% 6%;
+    object-fit: contain;
+    flex: 3;
+    transform: translate(-8%, 7vh);
 }
 
 #top-holder {
@@ -45,11 +39,12 @@ body {
 
 #div-2 {
     width: 100%;
-    height: 65vh;
+    height: 35vh;
     display: flex;
     flex-direction: column;
     align-content: right;
-    transform: translate(0, 35vh);
+    margin-top: 5%;
+    background-size: 100%;
 }
 
 .bottom-text {
@@ -62,7 +57,7 @@ body {
     margin-right: 3%;
     color: white;
     padding: 2% 0;
-    padding-left: 8%;
+    padding-left: 24%;
     padding-right: 3%;
 }
 
@@ -88,7 +83,8 @@ body {
 }
 
 #pill-fade {
-    margin-top: 20%;
+    margin-top: 10%;
+    padding-top: 10%;
     width: 100%;
     background-size: 100%;
     height: fit-content;

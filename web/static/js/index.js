@@ -20,6 +20,6 @@ main(() => {
     */
     const appBtn = document.getElementById("app-btn")
     appBtn.addEventListener("click", async (e) => {
-        console.log("here")
+        window.location.replace("/app")
     })
 })

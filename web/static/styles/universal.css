@@ -1,6 +1,9 @@
 body {
     margin: 0;
     background-color: #F6F4F3;
+    font-family: "Yantramanav", serif;
+    font-weight: 400;
+    font-size: 3vh;
 }
 
 .page-holder {
