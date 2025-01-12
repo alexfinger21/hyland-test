@@ -22,12 +22,12 @@ function getNextMedicationDay(startDate, interval) {
 }
 
 
-const createPrescription = (med) => {
+const createPrescription = (med, link) => {
     const element = document.createElement("template")
     element.innerHTML = `<button class="prescriptions-container">
                 <div class="prescriptions-horizontal-container">
                     <div class="prescriptions-head-container">
-                        <p class="prescriptions-header">${name}: ${getNextMedicationDay(startDate, interval)}</p>
+                        <p class="prescriptions-header">${med.Name}: ${getNextMedicationDay(med.StartDate, med.Interval)}</p>
                         <p class="prescriptions-description">Click To Expand</p>
                     </div>
                     <div class="remove-button">
@@ -38,41 +38,41 @@ const createPrescription = (med) => {
                     <div class="prescriptions-row">
                         <div>
                             <label for="endDate">End Date:</label><br>
-                            <input type="date" id="fquantity" name="fquantity"><br>
+                            <input type="date" id="fquantity" name="fquantity" value="${med.EndDate}"><br>
                         </div>
                         <div>
                             <label for="startDate">Start Date:</label><br>
-                            <input type="date" id="fstartName" name="fstartName"><br>
+                            <input type="date" id="fstartDate" name="fstartDate" value="${med.StartDate}"><br>
                         </div>
                     </div>
                     <div class="prescriptions-row">
                         <div>
                             <label for="strength">Strength:</label><br>
-                            <input type="text" id="fstrength" name="strength"><br>
+                            <input type="text" id="fstrength" name="strength" value="${med.Strength}"><br>
                         </div>
                         <div>
                             <label for="directions">Directions:</label><br>
-                            <input type="text" id="fdirections" name="directions" ><br>
+                            <input type="text" id="fdirections" name="directions" value="${med.Directions}"><br>
                         </div>
                     </div>
                     <div class="prescriptions-row">
                         <div>
                             <label for="hour">Hour:</label><br>
-                            <input type="text" id="fHour" name="fHour" value=${med.Hour}><br>
+                            <input type="text" id="fHour" name="fHour" value="${med.Hour}"><br>
                         </div>
                         <div>
                             <label for="interval">Interval:</label><br>
-                            <input type="text" id="finterval" name="interval" value=${med.Interval}><br>
+                            <input type="text" id="finterval" name="interval" value="${med.Interval}"><br>
                         </div>
                     </div>
                     <div class="prescriptions-row">
                         <div>
                             <label for="quantity">Quantity:</label><br>
-                            <input type="text" id="fquantity" name="fquantity" value=${med.Quantity}><br>
+                            <input type="text" id="fquantity" name="fquantity" value="${med.Quantity}"><br>
                         </div>
                         <div>
                             <label for="refills">Refills:</label><br>
-                            <input type="text" id="frefills" name="refills" value=${med.Refills}><br>
+                            <input type="text" id="frefills" name="refills" value="${med.Refills}"><br>
                         </div>
                     </div>
                     <p>${med.Warnings}</p>
@@ -153,15 +153,10 @@ main(() => {
         
         const onButtonPress = (event) => {
             event.preventDefault()
-            const med = req[counter-1]
-            const btn = createPrescription(med.Name, med.StartDate, med.Interval)
-            scroller.appendChild(btn)
-            const headContainer = btn.getElementsByClassName("prescriptions-head-container")[0]
-            btn.style.maxHeight = headContainer.clientHeight + 10 + "px"
             update()
         }
 
-        const saveLocalStorage = async (elemVals) => {
+        const saveLocalStorage = async (elemVals, counter) => {
             let request;
             const rqBody = {
                 "Name": elemVals[0],
@@ -175,6 +170,7 @@ main(() => {
                 "EndDate": elemVals[8].replace(/-/g, ''),
                 "Warnings": elemVals[9],
             }
+            console.log("OHOHOGOGOGODFIASDOAH:SFHAKSHFBLSDFLAK")
             console.log(rqBody)
 
             if (elemVals[0] && elemVals[0].length != 0) {
@@ -185,6 +181,14 @@ main(() => {
             }
 
             const calUrl =  await request.text()
+            console.log("COUNTER", counter)
+            const med = req[counter]
+            console.log(med)
+            const btn = createPrescription(med)
+            btn.style.zIndex = counter
+            scroller.appendChild(btn)
+            const headContainer = btn.getElementsByClassName("prescriptions-head-container")[0]
+            btn.style.maxHeight = headContainer.clientHeight + 10 + "px"
 
             const saveBody = {
                 "Name": elemVals[0],
@@ -211,7 +215,7 @@ main(() => {
         const update = async () => {
             if (counter != 0) {
                 const elemVals = Object.values(formElements).slice(0, 10).map(m => m.value)
-                saveLocalStorage(elemVals)
+                saveLocalStorage(elemVals, counter-1)
             }
 
             const med = req[counter]
@@ -229,12 +233,19 @@ main(() => {
             formElements[9].value = med.Warnings
 
             if (counter >= req.length - 1) {
-                const elemVals = Object.values(formElements).slice(0, 10).map(m => m.value)
-                saveLocalStorage(elemVals)
                 addButton.removeEventListener("click", onButtonPress)
-                prescriptionBg.classList.add("hidden")
-                addButton.classList.remove("expanded")
-                addButton.innerText = "+"
+                const lastClick = (e) => {
+                    e.preventDefault()
+                    console.log("ASDJKHASKDJASHKJDS")
+                    const elemVals = Object.values(formElements).slice(0, 10).map(m => m.value)
+                    saveLocalStorage(elemVals, counter-1)
+                    prescriptionBg.classList.add("hidden")
+                    addButton.classList.remove("expanded")
+                    addButton.innerText = "+"
+                    addButton.removeEventListener("click", lastClick)
+                }
+
+                addButton.addEventListener("click", lastClick)
             }
             counter += 1
         }
