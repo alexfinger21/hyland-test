@@ -1,7 +1,6 @@
 from flask import Flask, redirect
 from flask import render_template, request
 from flask_cors import CORS
-from datetime import datetime, timedelta
 import urllib
 from openai import OpenAI
 from pydantic import BaseModel
@@ -12,6 +11,7 @@ import datetime
 import base64
 import cv2
 import numpy as np
+import re
 
 global id_count
 id_count = 1
@@ -21,66 +21,92 @@ client = OpenAI(
     api_key = os.getenv("HACKATHON_KEY")
 )
 
-# some code from https://github.com/nimadorostkar/CamScanner
-def camscanner_effect(image_path, output_path):
-    image = cv2.imread(image_path)
-    orig = image.copy()
 
+def enhance_contrast(image):
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    l, a, b = cv2.split(lab)
+    
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    cl = clahe.apply(l)
+    
+    enhanced_img = cv2.merge((cl, a, b))
+    return cv2.cvtColor(enhanced_img, cv2.COLOR_LAB2BGR)
+
+def detect_edges(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
+    
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    
+    edges = cv2.Canny(blurred, 50, 150)
+    return edges
 
-    edged = cv2.Canny(blurred, 50, 150)
-
-    contours, _ = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+def find_document_contour(edges):
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
-
+    
     for contour in contours:
         perimeter = cv2.arcLength(contour, True)
         approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
+        
         if len(approx) == 4:
-            screen_contour = approx
-            break
+            return approx
+    return None
 
-    pts = screen_contour.reshape(4, 2)
+def apply_perspective_transform(image, contour):
+    pts = contour.reshape(4, 2)
     rect = np.zeros((4, 2), dtype="float32")
+    
     s = pts.sum(axis=1)
     rect[0] = pts[np.argmin(s)]
     rect[2] = pts[np.argmax(s)]
+    
     diff = np.diff(pts, axis=1)
     rect[1] = pts[np.argmin(diff)]
     rect[3] = pts[np.argmax(diff)]
-
+    
     (tl, tr, br, bl) = rect
-    widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
-    widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
-    heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
-    heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
-
+    widthA = np.linalg.norm(br - bl)
+    widthB = np.linalg.norm(tr - tl)
     maxWidth = max(int(widthA), int(widthB))
+    
+    heightA = np.linalg.norm(tr - br)
+    heightB = np.linalg.norm(tl - bl)
     maxHeight = max(int(heightA), int(heightB))
-
+    
     dst = np.array([
         [0, 0],
         [maxWidth - 1, 0],
         [maxWidth - 1, maxHeight - 1],
         [0, maxHeight - 1]
     ], dtype="float32")
-
+    
     M = cv2.getPerspectiveTransform(rect, dst)
-    warped = cv2.warpPerspective(orig, M, (maxWidth, maxHeight))
+    warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
+    return warped
 
-    denoised = cv2.fastNlMeansDenoisingColored(warped, None, 10, 10, 7, 21)
+def process_image(image_path, end_path):
+    image = cv2.imread(image_path)
+    original = image.copy()
+    
+    edges = detect_edges(image)
+    #cv2.imwrite("detect_edges.jpg", edges)
+    
+    contour = find_document_contour(edges)
+    #contour_image = original.copy()
+    #cv2.drawContours(contour_image, contour, -1, (0, 255, 0), 2)
+    #cv2.imwrite("draw_contours.jpg", contour_image)
 
-    gray_denoised = cv2.cvtColor(denoised, cv2.COLOR_BGR2GRAY)
-    _, thresholded = cv2.threshold(gray_denoised, 127, 255, cv2.THRESH_BINARY)
-
-    kernel = np.array([[0, -1, 0],
-                       [-1, 5, -1],
-                       [0, -1, 0]])
-    sharpened = cv2.filter2D(thresholded, -1, kernel)
-
-    cv2.imwrite(output_path, sharpened)
+    if contour is None:
+        print("No document found!")
+        return
+    
+    scanned = apply_perspective_transform(original, contour)
+    #cv2.imwrite("perspective_transform.jpg", scanned)
+    
+    #final = enhance_contrast(scanned)
+    
+    cv2.imwrite(end_path, scanned)
 
 
 def encode_image(image_path):
@@ -108,6 +134,8 @@ app = Flask(
     template_folder="web/templates",
 )
 
+
+
 @app.route("/upload-photo", methods=["POST"])
 def process_photo():
 
@@ -117,11 +145,12 @@ def process_photo():
     if image:
         image.save("./raw.jpg")
     else:
+        print("not sigma at ALL")
         print("***************** IMAGE NOT UPLOADED *****************")
 
-    camscanner_effect("raw.jpg", "scanned.jpg")
+    #process_image("raw.jpg", "scanned.jpg")
 
-    with open("scanned.jpg", "rb") as f:
+    with open("raw.jpg", "rb") as f:
         image_bytes = f.read()
 
     base64_image = base64.b64encode(image_bytes).decode('utf-8')
@@ -136,7 +165,7 @@ def process_photo():
                         "type": "text",
                         "text": 
                         """
-                        extract the prescription  and respond with json in the following format
+                        extract all 4 prescriptions and respond with json in the following format
                         {
                         "Name": "",  # name of drug
                         "Strength": 0,  # mg/pill
@@ -161,28 +190,23 @@ def process_photo():
     )
 
     prescription_info = response.choices[0].message.content
-    if prescription_info[9] == '[':
-        try:
-            dict_data = json.loads(prescription_info[7:-3])
-        except:
-            return json.dumps({"error": "incorrect image"})
-    else:
-        try:
-            dict_data = json.loads(prescription_info[8:-4])
-        except:
-            return json.dumps({"error": "incorrect image"})
+    match = re.search(r'```json(.*)```', prescription_info, re.DOTALL)
+    print(prescription_info)
+    if match:
+        print("Found Chat GPT Yap")
+        prescription_info = "```json" + match.group(1) + "```"
 
-    to_break = False
+    print(prescription_info)
+    if prescription_info[8] == '{':
+        prescription_info = '[' + prescription_info[8:-4] + ']'
+    else:
+        prescription_info = prescription_info[8:-4]
+    print(f"Perscription Info: {prescription_info}")
+    dict_data = json.loads(prescription_info)
+
     # for each prescription in the image
     for i in range(len(dict_data)):
-        
-        try:
-            dict_data[0]
-            data = dict_data[i]
-        except:
-            data = dict_data
-            to_break = True
-
+        data = dict_data[i]
         # logic to figure out what the end date is
         if data['StartDate'] == data['EndDate']:
             startdate = datetime.date(int(data['StartDate'][:4]), int(data['StartDate'][4:6]), int(data['StartDate'][6:8]))
@@ -203,10 +227,8 @@ def process_photo():
         else:
             data['Hour'] = "12"
         del data['TimeOfDay']
-        if to_break:
-            break
 
-    print(json.dumps(dict_data))
+    print(f"DICT!!!!!!! {json.dumps(dict_data)}")
     return json.dumps(dict_data)
     
 
@@ -220,26 +242,26 @@ def getApp():
 ##example perscription
 prescription = {
     "id": 0, # number ID
-    "Name": "Metformin",  # name of drug
-    "Strength": 500,  # mg/pill
-    "StartDate": "20240102", # start date (in format YYYYMMDD)
-    "Directions": "Take 1 tablet by mouth up to 2 times daily",  # just a string of directions
-    "Hour": "09",
-    "Interval": 3,  # how often it should be taken in days (minimum 1)
-    "Quantity": 0,  # pills in bottle   
-    "Refills": 0,  # number of refills
-    "EndDate": "20240302",  # refill date if there are refills, end date if refills == 0 (in format YYYYMMDD)
+    "Name": "Metformin",  # required
+    "Strength": 500,  # required
+    "StartDate": "20240102", # start date (in format YYYYMMDD) r
+    "Directions": "Take 1 tablet by mouth up to 2 times daily",  # just a string of directions req
+    "Hour": "09", # req
+    "Interval": 3,  # how often it should be taken in days (minimum 1) req
+    "Quantity": 0,  # pills in bottle   req
+    "Refills": 0,  # number of refills  req
+    "EndDate": "20240302",  # refill date if there are refills, end date if refills == 0 (in format YYYYMMDD) req
     "Warnings": "Take this medication with food"
 }
-@app.route('/create-event')
+@app.route('/create-event', methods=["POST"])
 def create_event():
-    prescription = request.get("prescription")
+    prescription = request.get_json(force=True)
     if len(prescription["Hour"]) == 1:
         prescription["Hour"] = f"0{prescription['Hour']}"
     
-    m_event_name = f"{prescription['Name']} {prescription['Strength']}mg" #replace with drug name
+    m_event_name = f"{prescription['Name']}+{prescription['Strength']}mg" #replace with drug name
     m_start_date_starttime = f"{prescription['StartDate']}T{prescription['Hour']}0000-0500"
-    m_start_date_endtime = datetime.strptime(m_start_date_starttime, "%Y%m%dT%H%M%S%z") + timedelta(minutes=30)
+    m_start_date_endtime = datetime.datetime.strptime(m_start_date_starttime, "%Y%m%dT%H%M%S%z") + datetime.timedelta(minutes=30)
     m_start_date_endtime = m_start_date_endtime.strftime("%Y%m%dT%H%M%S%z")  # Convert to string
     m_end_date = f"{prescription['EndDate']}T000000Z"
     m_interval = prescription['Interval']
@@ -259,8 +281,9 @@ def create_event():
     )
     # calendar_url = "https://calendar.google.com/calendar/u/0/r/eventedit?text=Metformin+500mg&dates=20240101T090000-0500/20240102T093000-0500&details=DIRECTIONS:%0ATake+1+tablet+by+mouth+up+to+2+times+daily%0A%0AWARNINGS:%0ATake+this+medication+with+food&recur=RRULE:FREQ%3DDAILY;INTERVAL%3D1;UNTIL%3D20110201T020000Z"
     # print(calendar_url)
+    print(m_calendar_url)
 
-    return redirect(m_calendar_url)
+    return m_calendar_url
 
 
 def create_app():
