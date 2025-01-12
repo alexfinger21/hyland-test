@@ -47,6 +47,7 @@ app = Flask(
 @app.route("/upload-photo", methods=["POST"])
 def process_photo():
     global id_count
+
     print("about to query gpt")
     image = request.files.get("image", "")
     image.save("./test.jpg")
@@ -91,35 +92,52 @@ def process_photo():
     )
     print("just finished querying gpt")
     prescription_info = response.choices[0].message.content
-    print(prescription_info)
-    try:
-        dict_data = json.loads(prescription_info[7:-3])
-    except:
-        return json.dumps({"error": "incorrect image"})
+    if prescription_info[9] == '[':
+        try:
+            dict_data = json.loads(prescription_info[7:-3])
+        except:
+            return json.dumps({"error": "incorrect image"})
+    else:
+        try:
+            dict_data = json.loads(prescription_info[8:-4])
+        except:
+            return json.dumps({"error": "incorrect image"})
 
+
+    to_break = False
     # for each prescription in the image
     for i in range(len(dict_data)):
+        
+        try:
+            dict_data[0]
+            data = dict_data[i]
+        except:
+            data = dict_data
+            to_break = True
+        print(data)
 
         # logic to figure out what the end date is
-        if dict_data[i]['StartDate'] == dict_data[i]['EndDate']:
-            startdate = datetime.date(int(dict_data[i]['StartDate'][:4]), int(dict_data[i]['StartDate'][4:6]), int(dict_data[i]['StartDate'][6:8]))
-            delta = datetime.timedelta(days=dict_data[i]['Quantity'] * dict_data[i]['Interval'])
+        if data['StartDate'] == data['EndDate']:
+            startdate = datetime.date(int(data['StartDate'][:4]), int(data['StartDate'][4:6]), int(data['StartDate'][6:8]))
+            delta = datetime.timedelta(days=data['Quantity'] * data['Interval'])
             endDate = (startdate + delta).isoformat()
             endDate = endDate.replace("-", "")
-            dict_data[i]['EndDate'] = endDate
+            data['EndDate'] = endDate
         
         # adds the id count
-        dict_data[i]['id'] = id_count
+        data['id'] = id_count
         id_count += 1
 
         # generates a time to take the medicine
-        if dict_data[i]['TimeOfDay'] == 'M':
-            dict_data[i]['Hour'] = "06"
-        elif dict_data[i]['TimeOfDay'] == 'E':
-            dict_data[i]['Hour'] = "18"
+        if data['TimeOfDay'] == 'M':
+            data['Hour'] = "06"
+        elif data['TimeOfDay'] == 'E':
+            data['Hour'] = "18"
         else:
-            dict_data[i]['Hour'] = "12"
-        del dict_data[i]['TimeOfDay']
+            data['Hour'] = "12"
+        del data['TimeOfDay']
+        if to_break:
+            break
 
     print(json.dumps(dict_data))
     return json.dumps(dict_data)
