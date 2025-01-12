@@ -29,13 +29,38 @@
     flex-direction: column;
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 4px 10px 0 rgba(0, 0, 0, 0.19);
     border: none;
+    height: 8vh;
     border-radius: 50px;
     margin-bottom: 2vh;
     margin-left: 3.5%;
     margin-right: 3.5%;
     background-color: #F6F4F3;
     padding: 2%;
+    transition: all .5s;
 }
+
+
+.prescriptions-container.expanded {
+    height: 55vh;
+    display: inline-block;
+}
+
+
+.prescriptions-container.expanded .prescriptions-description {
+    opacity: 0;
+}
+
+
+.prescriptions-container.expanded .prescriptions-form {
+    opacity: 1;
+}
+
+
+#new-prescriptions-bg.expanded .prescriptions-form {
+    opacity: 1;
+}
+
+
 
 .prescriptions-horizontal-container {
     display: flex;
@@ -67,15 +92,19 @@
 
 
 .prescriptions-description {
+    opacity: 1;
     text-align: center;
     color: #C2C2C2;
+    transform: all .5s;
 }
 
 .prescriptions-form {
+    opacity: 0;
     width: 100%;
-    height: 100%;
+    height: fit-content;
     margin-top: 1vh;
     margin-bottom: 1vh;
+    transition: all .5s;
 }
 
 .prescriptions-row {
@@ -172,9 +201,15 @@
     width: 7vh;
     border-radius: 1000px;
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 4px 10px 0 rgba(0, 0, 0, 0.19);
+    transition: all .5s;
 }
 
-#new-prescription-bg {
+#add-button.expanded {
+    width: 15vh;
+    font-size: 1.2em;
+}
+
+#new-prescriptions-bg {
     display: block;
     position: absolute;
     top:5vh;
