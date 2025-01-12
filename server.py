@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 import json
 import datetime
 import base64
+import cv2
+import numpy as np
 
 global id_count
 id_count = 1
@@ -18,6 +20,68 @@ load_dotenv()
 client = OpenAI(
     api_key = os.getenv("HACKATHON_KEY")
 )
+
+# some code from https://github.com/nimadorostkar/CamScanner
+def camscanner_effect(image_path, output_path):
+    image = cv2.imread(image_path)
+    orig = image.copy()
+
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+
+    edged = cv2.Canny(blurred, 50, 150)
+
+    contours, _ = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)
+
+    for contour in contours:
+        perimeter = cv2.arcLength(contour, True)
+        approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
+        if len(approx) == 4:
+            screen_contour = approx
+            break
+
+    pts = screen_contour.reshape(4, 2)
+    rect = np.zeros((4, 2), dtype="float32")
+    s = pts.sum(axis=1)
+    rect[0] = pts[np.argmin(s)]
+    rect[2] = pts[np.argmax(s)]
+    diff = np.diff(pts, axis=1)
+    rect[1] = pts[np.argmin(diff)]
+    rect[3] = pts[np.argmax(diff)]
+
+    (tl, tr, br, bl) = rect
+    widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
+    widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
+    heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
+    heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
+
+    maxWidth = max(int(widthA), int(widthB))
+    maxHeight = max(int(heightA), int(heightB))
+
+    dst = np.array([
+        [0, 0],
+        [maxWidth - 1, 0],
+        [maxWidth - 1, maxHeight - 1],
+        [0, maxHeight - 1]
+    ], dtype="float32")
+
+    M = cv2.getPerspectiveTransform(rect, dst)
+    warped = cv2.warpPerspective(orig, M, (maxWidth, maxHeight))
+
+    denoised = cv2.fastNlMeansDenoisingColored(warped, None, 10, 10, 7, 21)
+
+    gray_denoised = cv2.cvtColor(denoised, cv2.COLOR_BGR2GRAY)
+    _, thresholded = cv2.threshold(gray_denoised, 127, 255, cv2.THRESH_BINARY)
+
+    kernel = np.array([[0, -1, 0],
+                       [-1, 5, -1],
+                       [0, -1, 0]])
+    sharpened = cv2.filter2D(thresholded, -1, kernel)
+
+    cv2.imwrite(output_path, sharpened)
+
 
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
@@ -46,13 +110,18 @@ app = Flask(
 
 @app.route("/upload-photo", methods=["POST"])
 def process_photo():
+
     global id_count
 
-    print("about to query gpt")
     image = request.files.get("image", "")
-    image.save("./test.jpg")
+    if image:
+        image.save("./raw.jpg")
+    else:
+        print("***************** IMAGE NOT UPLOADED *****************")
 
-    with open("test.jpg", "rb") as f:
+    camscanner_effect("raw.jpg", "scanned.jpg")
+
+    with open("scanned.jpg", "rb") as f:
         image_bytes = f.read()
 
     base64_image = base64.b64encode(image_bytes).decode('utf-8')
@@ -90,7 +159,7 @@ def process_photo():
             }
         ],
     )
-    print("just finished querying gpt")
+
     prescription_info = response.choices[0].message.content
     if prescription_info[9] == '[':
         try:
@@ -137,7 +206,6 @@ def process_photo():
         if to_break:
             break
 
-    print("YO2")
     print(json.dumps(dict_data))
     return json.dumps(dict_data)
     
@@ -181,7 +249,6 @@ def create_event():
     m_encoded_description = urllib.parse.quote(m_description)
     
     
-    
     # make url
     m_calendar_url = (
         f"https://calendar.google.com/calendar/render?action=TEMPLATE"
@@ -195,10 +262,12 @@ def create_event():
 
     return redirect(m_calendar_url)
 
+
 def create_app():
     app.config['CORS_HEADERS'] = 'Content-Type'
     CORS(app)
     return app
+
 if __name__ == "__main__":
     app = create_app()
     app.run(host="0.0.0.0", port=8080, debug=True)
