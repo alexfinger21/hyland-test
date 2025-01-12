@@ -190,7 +190,7 @@ def process_photo():
     )
 
     prescription_info = response.choices[0].message.content
-    match = re.match(r'({.*})', prescription_info)
+    match = re.search(r'```json (.*?)```', prescription_info, re.DOTALL)
     print(prescription_info)
     if match:
         prescription_info = match.group(1)
