@@ -108,8 +108,15 @@ main(() => {
         for (let i = 0; i<localS.length; ++i) {
             console.log(localS[i])
             const btn = createPrescription(localS[i])
+            const nm = localS[i].Name
             btn.style.zIndex = i
             scroller.appendChild(btn)
+            const rmd = btn.getElementsByClassName("prescriptions-horizontal-container")[0].getElementsByClassName("remove-button")[0]
+            rmd.addEventListener("click", (e) => {
+                btn.remove()
+                const ls = JSON.parse(localStorage.getItem("previousPrescriptions")).filter(l => l.Name != nm)
+                localStorage.setItem("previousPrescriptions", JSON.stringify(ls))
+            })
         }
     }
 
@@ -182,8 +189,6 @@ main(() => {
                 "EndDate": elemVals[8].replace(/-/g, ''),
                 "Warnings": elemVals[9],
             }
-            console.log("OHOHOGOGOGODFIASDOAH:SFHAKSHFBLSDFLAK")
-            console.log(rqBody)
 
             if (elemVals[0] && elemVals[0].length != 0) {
                 request = await fetch("/create-event", {
