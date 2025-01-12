@@ -1,0 +1,71 @@
+
+#app-title {
+    display: flex;
+    flex: 1;
+    align-self: center;
+    font-size: 2.1em;
+    color: #1D3354;
+    margin:0;
+    text-decoration: underline;
+}
+
+#scroller {
+    display: flex;
+    flex-direction: column;
+    flex: 8;
+    padding-top: 5%;
+    overflow-y: auto;
+    overflow-x: none;
+}
+
+.prescriptions-container {
+    display: flex;
+    flex-direction: row;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border: none;
+    border-radius: 100px;
+    margin-bottom: 2vh;
+    margin-left: 3.5%;
+    margin-right: 3.5%;
+    background-color: #F6F4F3;
+    padding: 2%;
+}
+
+.prescriptions-head-container {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    margin-left: 5%;
+    flex: 10;
+}   
+
+.prescriptions-head-container p {
+    font-size: 1.5em;
+    margin: 0px;
+    margin-top: 2%;
+    margin-bottom: 2%;
+}
+
+.prescriptions-header {
+    color: #1D3354;
+}
+
+
+.prescriptions-description {
+    color: #C2C2C2;
+}
+
+
+.remove-button {
+    display: flex;
+    flex: 1;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-right: 5%;
+}
+
+.remove-button img {
+    width: 100%;
+    height: 100%;
+    filter: brightness(60%)
+}
