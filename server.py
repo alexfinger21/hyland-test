@@ -21,67 +21,6 @@ client = OpenAI(
     api_key = os.getenv("HACKATHON_KEY")
 )
 
-# some code from https://github.com/nimadorostkar/CamScanner
-def camscanner_effect(image_path, output_path):
-    image = cv2.imread(image_path)
-    orig = image.copy()
-
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-
-    edged = cv2.Canny(blurred, 50, 150)
-
-    contours, _ = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    contours = sorted(contours, key=cv2.contourArea, reverse=True)
-
-    for contour in contours:
-        perimeter = cv2.arcLength(contour, True)
-        approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
-        if len(approx) == 4:
-            screen_contour = approx
-            break
-
-    pts = screen_contour.reshape(4, 2)
-    rect = np.zeros((4, 2), dtype="float32")
-    s = pts.sum(axis=1)
-    rect[0] = pts[np.argmin(s)]
-    rect[2] = pts[np.argmax(s)]
-    diff = np.diff(pts, axis=1)
-    rect[1] = pts[np.argmin(diff)]
-    rect[3] = pts[np.argmax(diff)]
-
-    (tl, tr, br, bl) = rect
-    widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
-    widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
-    heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
-    heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
-
-    maxWidth = max(int(widthA), int(widthB))
-    maxHeight = max(int(heightA), int(heightB))
-
-    dst = np.array([
-        [0, 0],
-        [maxWidth - 1, 0],
-        [maxWidth - 1, maxHeight - 1],
-        [0, maxHeight - 1]
-    ], dtype="float32")
-
-    M = cv2.getPerspectiveTransform(rect, dst)
-    warped = cv2.warpPerspective(orig, M, (maxWidth, maxHeight))
-
-    denoised = cv2.fastNlMeansDenoisingColored(warped, None, 10, 10, 7, 21)
-
-    gray_denoised = cv2.cvtColor(denoised, cv2.COLOR_BGR2GRAY)
-    _, thresholded = cv2.threshold(gray_denoised, 127, 255, cv2.THRESH_BINARY)
-
-    kernel = np.array([[0, -1, 0],
-                       [-1, 5, -1],
-                       [0, -1, 0]])
-    sharpened = cv2.filter2D(thresholded, -1, kernel)
-
-    cv2.imwrite(output_path, sharpened)
-
 
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
@@ -117,11 +56,12 @@ def process_photo():
     if image:
         image.save("./raw.jpg")
     else:
+        print("not sigma at ALL")
         print("***************** IMAGE NOT UPLOADED *****************")
 
-    camscanner_effect("raw.jpg", "scanned.jpg")
+    #camscanner_effect("raw.jpg", "scanned.jpg")
 
-    with open("scanned.jpg", "rb") as f:
+    with open("raw.jpg", "rb") as f:
         image_bytes = f.read()
 
     base64_image = base64.b64encode(image_bytes).decode('utf-8')
@@ -160,29 +100,18 @@ def process_photo():
         ],
     )
 
-    prescription_info = response.choices[0].message.content
-    if prescription_info[9] == '[':
-        try:
-            dict_data = json.loads(prescription_info[7:-3])
-        except:
-            return json.dumps({"error": "incorrect image"})
-    else:
-        try:
-            dict_data = json.loads(prescription_info[8:-4])
-        except:
-            return json.dumps({"error": "incorrect image"})
 
-    to_break = False
+    prescription_info = response.choices[0].message.content
+    if prescription_info[8] == '{':
+        prescription_info = '[' + prescription_info[8:-4] + ']'
+    else:
+        prescription_info = prescription_info[8:-4]
+    print(f"Perscription Info: {prescription_info}")
+    dict_data = json.loads(prescription_info)
+
     # for each prescription in the image
     for i in range(len(dict_data)):
-        
-        try:
-            dict_data[0]
-            data = dict_data[i]
-        except:
-            data = dict_data
-            to_break = True
-
+        data = dict_data[i]
         # logic to figure out what the end date is
         if data['StartDate'] == data['EndDate']:
             startdate = datetime.date(int(data['StartDate'][:4]), int(data['StartDate'][4:6]), int(data['StartDate'][6:8]))
@@ -203,10 +132,8 @@ def process_photo():
         else:
             data['Hour'] = "12"
         del data['TimeOfDay']
-        if to_break:
-            break
 
-    print(json.dumps(dict_data))
+    print(f"DICT!!!!!!! {json.dumps(dict_data)}")
     return json.dumps(dict_data)
     
 
