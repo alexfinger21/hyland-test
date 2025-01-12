@@ -2,7 +2,7 @@ import { main } from "./utility.js"
 
 main(() => {
     const uploadBtn = document.getElementById("files")
-    uploadBtn.addEventListener("click", async (e) => {
+    uploadBtn.addEventListener("change", async (e) => {
         const url = "http://localhost:8080/upload-photo"
         const formData = new FormData()
         formData.append("image", document.getElementById("files").files[0])
