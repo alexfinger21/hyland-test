@@ -31,7 +31,7 @@ const createPrescription = (name, startDate, interval) => {
                         <p class="prescriptions-description">Click To Expand</p>
                     </div>
                     <div class="remove-button">
-                        <img alt="remove prescription" src="{{url_for('static', filename='media/remove.png')}}"/>
+                        <img alt="remove prescription" src="media/remove.png"/>
                     </div>
                 </div>
                 <form class="prescriptions-form">
@@ -76,22 +76,12 @@ const createPrescription = (name, startDate, interval) => {
                         </div>
                     </div>
                     <div class="prescriptions-row">
-                        <div>
-                            <label for="endDate">End Date:</label><br>
-                            <input type="date" id="fquantity" name="fquantity"><br>
-                        </div>
-                        <div>
-                            <label for="warnings">Warnings:</label><br>
-                            <input type="text" id="fwarnings" name="refills"><br>
-                        </div>
-                    </div>
+
                 </form>
                 <a class="prescriptions-action">Add to Google Calendar</a>
             </button>`
 
     const btn = element.content.firstChild
-    const headContainer = btn.getElementsByClassName("prescriptions-head-container")[0]
-    btn.style.maxHeight = headContainer.clientHeight + 10 + "px"
     btn.addEventListener("click", () => {
         if(btn.classList.contains("expanded")) {
             btn.classList.remove("expanded")
@@ -155,13 +145,16 @@ main(() => {
         const scroller = document.getElementById("scroller")
         const header = prescriptionBg.getElementsByClassName("prescriptions-head-container")[0]
         const formElements = Array.from(prescriptionBg.getElementsByClassName("prescriptions-form"))[0]
-        let counter = 0
+        let counter = 0 
 
         
         const onButtonPress = (event) => {
             event.preventDefault()
             const med = req[counter-1]
-            scroller.appendChild(createPrescription(med.Name, med.StartDate, med.Interval))
+            const btn = createPrescription(med.Name, med.StartDate, med.Interval)
+            scroller.appendChild(btn)
+            const headContainer = btn.getElementsByClassName("prescriptions-head-container")[0]
+            btn.style.maxHeight = headContainer.clientHeight + 10 + "px"
             update()
         }
 
