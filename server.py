@@ -146,6 +146,9 @@ prescription = {
 @app.route('/create-event')
 def create_event():
     prescription = request.get("prescription")
+    if len(prescription["Hour"]) == 1:
+        prescription["Hour"] = f"0{prescription['Hour']}"
+    
     m_event_name = f"{prescription['Name']} {prescription['Strength']}mg" #replace with drug name
     m_start_date_starttime = f"{prescription['StartDate']}T{prescription['Hour']}0000-0500"
     m_start_date_endtime = datetime.strptime(m_start_date_starttime, "%Y%m%dT%H%M%S%z") + timedelta(minutes=30)
