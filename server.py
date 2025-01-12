@@ -103,7 +103,6 @@ def process_photo():
         except:
             return json.dumps({"error": "incorrect image"})
 
-
     to_break = False
     # for each prescription in the image
     for i in range(len(dict_data)):
@@ -138,6 +137,7 @@ def process_photo():
         if to_break:
             break
 
+    print("YO2")
     print(json.dumps(dict_data))
     return json.dumps(dict_data)
     
