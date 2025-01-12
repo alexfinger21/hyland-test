@@ -1,7 +1,6 @@
 from flask import Flask, redirect
 from flask import render_template, request
 from flask_cors import CORS
-from datetime import datetime, timedelta
 import urllib
 from openai import OpenAI
 from pydantic import BaseModel
@@ -147,26 +146,26 @@ def getApp():
 ##example perscription
 prescription = {
     "id": 0, # number ID
-    "Name": "Metformin",  # name of drug
-    "Strength": 500,  # mg/pill
-    "StartDate": "20240102", # start date (in format YYYYMMDD)
-    "Directions": "Take 1 tablet by mouth up to 2 times daily",  # just a string of directions
-    "Hour": "09",
-    "Interval": 3,  # how often it should be taken in days (minimum 1)
-    "Quantity": 0,  # pills in bottle   
-    "Refills": 0,  # number of refills
-    "EndDate": "20240302",  # refill date if there are refills, end date if refills == 0 (in format YYYYMMDD)
+    "Name": "Metformin",  # required
+    "Strength": 500,  # required
+    "StartDate": "20240102", # start date (in format YYYYMMDD) r
+    "Directions": "Take 1 tablet by mouth up to 2 times daily",  # just a string of directions req
+    "Hour": "09", # req
+    "Interval": 3,  # how often it should be taken in days (minimum 1) req
+    "Quantity": 0,  # pills in bottle   req
+    "Refills": 0,  # number of refills  req
+    "EndDate": "20240302",  # refill date if there are refills, end date if refills == 0 (in format YYYYMMDD) req
     "Warnings": "Take this medication with food"
 }
-@app.route('/create-event')
+@app.route('/create-event', methods=["POST"])
 def create_event():
-    prescription = request.get("prescription")
+    prescription = request.get_json(force=True)
     if len(prescription["Hour"]) == 1:
         prescription["Hour"] = f"0{prescription['Hour']}"
     
-    m_event_name = f"{prescription['Name']} {prescription['Strength']}mg" #replace with drug name
+    m_event_name = f"{prescription['Name']}+{prescription['Strength']}mg" #replace with drug name
     m_start_date_starttime = f"{prescription['StartDate']}T{prescription['Hour']}0000-0500"
-    m_start_date_endtime = datetime.strptime(m_start_date_starttime, "%Y%m%dT%H%M%S%z") + timedelta(minutes=30)
+    m_start_date_endtime = datetime.datetime.strptime(m_start_date_starttime, "%Y%m%dT%H%M%S%z") + datetime.timedelta(minutes=30)
     m_start_date_endtime = m_start_date_endtime.strftime("%Y%m%dT%H%M%S%z")  # Convert to string
     m_end_date = f"{prescription['EndDate']}T000000Z"
     m_interval = prescription['Interval']
@@ -186,8 +185,9 @@ def create_event():
     )
     # calendar_url = "https://calendar.google.com/calendar/u/0/r/eventedit?text=Metformin+500mg&dates=20240101T090000-0500/20240102T093000-0500&details=DIRECTIONS:%0ATake+1+tablet+by+mouth+up+to+2+times+daily%0A%0AWARNINGS:%0ATake+this+medication+with+food&recur=RRULE:FREQ%3DDAILY;INTERVAL%3D1;UNTIL%3D20110201T020000Z"
     # print(calendar_url)
+    print(m_calendar_url)
 
-    return redirect(m_calendar_url)
+    return m_calendar_url
 
 
 def create_app():
