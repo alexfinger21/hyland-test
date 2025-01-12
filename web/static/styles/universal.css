@@ -25,11 +25,11 @@ body {
     align-items: center; /* Ensures vertical alignment */
     justify-content: start;
     gap: 10px; /* Adds spacing between images */
-    margin-left: -20px;
+    margin-left: 10px;
 }
 
 .logo-image, .medley-image {
-    height: 40px; /* Set desired height */
+    height: 25px; /* Set desired height */
     width: auto; /* Automatically adjust the width to maintain aspect ratio */
 }
 

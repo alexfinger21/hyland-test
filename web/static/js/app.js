@@ -8,14 +8,16 @@ main(() => {
         formData.append("image", document.getElementById("files").files[0])
         console.log(document.getElementById("files").files[0])
 
-        const req = await fetch(url, {
+        let req = await fetch(url, {
           method: "POST",
           body: formData
         })
 
+        req = await req.json()
+
         console.log(req)
         for (const x of req) {
-            console.log(req)
+            console.log(x)
         }
     })
 })
