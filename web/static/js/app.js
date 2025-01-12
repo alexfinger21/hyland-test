@@ -1,14 +1,131 @@
 import { main } from "./utility.js"
 
+
+function getNextMedicationDay(startDate, interval) {
+    const startDateObj = new Date(
+        parseInt(startDate.substring(0, 4)), 
+        parseInt(startDate.substring(4, 6)) - 1, // Month (0-indexed)
+        parseInt(startDate.substring(6, 8))
+    );
+
+    // Get today's date (set time to midnight for comparison)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Calculate the next occurrence
+    let nextDate = startDateObj;
+    while (nextDate <= today) {
+        nextDate.setDate(nextDate.getDate() + interval);
+    }
+
+    return nextDate.toLocaleDateString('en-US', { weekday: 'long' });
+}
+
+
+const createPrescription = (name, startDate, interval) => {
+    const element = document.createElement("template")
+    element.innerHTML = `<button class="prescriptions-container">
+                <div class="prescriptions-horizontal-container">
+                    <div class="prescriptions-head-container">
+                        <p class="prescriptions-header">${name}: Next ${getNextMedicationDay(startDate, interval)}</p>
+                        <p class="prescriptions-description">Click To Expand</p>
+                    </div>
+                    <div class="remove-button">
+                        <img alt="remove prescription" src="{{url_for('static', filename='media/remove.png')}}"/>
+                    </div>
+                </div>
+                <form class="prescriptions-form">
+                    <div class="prescriptions-row">
+                        <div>
+                            <label for="name">Name:</label><br>
+                            <input type="text" id="fname" name="fname"><br>
+                        </div>
+                        <div>
+                            <label for="strength">Strength:</label><br>
+                            <input type="text" id="fstrength" name="strength"><br>
+                        </div>
+                    </div>
+                    <div class="prescriptions-row">
+                        <div>
+                            <label for="startDate">Start Date:</label><br>
+                            <input type="date" id="fstartName" name="fstartName"><br>
+                        </div>
+                        <div>
+                            <label for="directions">Directions:</label><br>
+                            <input type="text" id="fdirections" name="directions"><br>
+                        </div>
+                    </div>
+                    <div class="prescriptions-row">
+                        <div>
+                            <label for="hour">Hour:</label><br>
+                            <input type="text" id="fHour" name="fHour"><br>
+                        </div>
+                        <div>
+                            <label for="interval">Interval:</label><br>
+                            <input type="text" id="finterval" name="interval"><br>
+                        </div>
+                    </div>
+                    <div class="prescriptions-row">
+                        <div>
+                            <label for="quantity">Quantity:</label><br>
+                            <input type="text" id="fquantity" name="fquantity"><br>
+                        </div>
+                        <div>
+                            <label for="refills">Refills:</label><br>
+                            <input type="text" id="frefills" name="refills"><br>
+                        </div>
+                    </div>
+                    <div class="prescriptions-row">
+                        <div>
+                            <label for="endDate">End Date:</label><br>
+                            <input type="date" id="fquantity" name="fquantity"><br>
+                        </div>
+                        <div>
+                            <label for="warnings">Warnings:</label><br>
+                            <input type="text" id="fwarnings" name="refills"><br>
+                        </div>
+                    </div>
+                </form>
+                <a class="prescriptions-action">Add to Google Calendar</a>
+            </button>`
+
+    const btn = element.content.firstChild
+    const headContainer = btn.getElementsByClassName("prescriptions-head-container")[0]
+    btn.style.maxHeight = headContainer.clientHeight + 10 + "px"
+    btn.addEventListener("click", () => {
+        if(btn.classList.contains("expanded")) {
+            btn.classList.remove("expanded")
+            btn.style.maxHeight = headContainer.clientHeight + 10 + "px"
+        }
+        else {
+            btn.classList.add("expanded")
+            btn.style.maxHeight = "1000px"
+        }
+    })
+
+    return btn
+    
+}
+
 main(() => {
     const uploadBtn = document.getElementById("files")
+    const addButton = document.getElementById("add-button")
+
+    addButton.addEventListener("touchstart", ()=> {
+        console.log('touch start')
+        addButton.classList.add("pressed")
+    })
+    addButton.addEventListener("touchend", ()=> {
+        console.log('touch end')
+        addButton.classList.remove("pressed")
+    })
+
     uploadBtn.addEventListener("change", async (e) => {
         const url = "http://localhost:8080/upload-photo"
         const formData = new FormData()
         formData.append("image", document.getElementById("files").files[0])
         console.log(document.getElementById("files").files[0])
         
-        const addButton = document.getElementById("add-button")
         
         addButton.classList.add("expanded")
         addButton.innerText = "Done"
@@ -35,6 +152,7 @@ main(() => {
 
         const prescriptionBg = document.getElementById("new-prescriptions-bg")
         prescriptionBg.classList.remove("hidden")
+        const scroller = document.getElementById("scroller")
         const header = prescriptionBg.getElementsByClassName("prescriptions-head-container")[0]
         const formElements = Array.from(prescriptionBg.getElementsByClassName("prescriptions-form"))[0]
         let counter = 0
@@ -42,6 +160,8 @@ main(() => {
         
         const onButtonPress = (event) => {
             event.preventDefault()
+            const med = req[counter-1]
+            scroller.appendChild(createPrescription(med.Name, med.StartDate, med.Interval))
             update()
         }
 
@@ -80,16 +200,4 @@ main(() => {
 
         
     })
-
-    const prescriptionButtons = document.getElementsByClassName("prescriptions-container")
-    for (const btn of prescriptionButtons) {
-        btn.addEventListener("click", () => {
-            if(btn.classList.contains("expanded")) {
-                btn.classList.remove("expanded")
-            }
-            else {
-                btn.classList.add("expanded")
-            }
-        })
-    }
 })

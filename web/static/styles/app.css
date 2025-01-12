@@ -27,9 +27,11 @@
 .prescriptions-container {
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 4px 10px 0 rgba(0, 0, 0, 0.19);
     border: none;
-    height: 8vh;
+    height: fit-content;
+    max-height: 10vh;
     border-radius: 50px;
     margin-bottom: 2vh;
     margin-left: 3.5%;
@@ -41,7 +43,7 @@
 
 
 .prescriptions-container.expanded {
-    height: 55vh;
+    max-height: 80vh;
     display: inline-block;
 }
 
@@ -96,6 +98,7 @@
     text-align: center;
     color: #C2C2C2;
     transform: all .5s;
+    margin-top: -5vh;
 }
 
 .prescriptions-form {
@@ -201,7 +204,8 @@
     width: 7vh;
     border-radius: 1000px;
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 4px 10px 0 rgba(0, 0, 0, 0.19);
-    transition: all .5s;
+    transition-property: all, transform;
+    transition-duration: 0.5s, 0.2s;
 }
 
 #add-button.expanded {
@@ -244,4 +248,8 @@
 
 #new-prescriptions-container .prescriptions-header {
     font-size: 1em;
+}
+
+.pressed {
+    transform: scale(0.85);
 }
